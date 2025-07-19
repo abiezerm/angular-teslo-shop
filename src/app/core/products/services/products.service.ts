@@ -1,9 +1,10 @@
-import { ProductResponse } from './../types/product.type';
+import { Gender, ProductResponse } from './../types/product.type';
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Product } from "../types/product.type";
 import { Observable, of, tap } from "rxjs";
 import { environment } from "src/environments/environment";
+import { User } from '@core/auth/types';
 
 type Options = {
   limit?: number;
@@ -11,12 +12,28 @@ type Options = {
   gender?: string;
 }
 
+  const emptyProduct: Product = {
+    id: 'new',
+    title: '',
+    description: '',
+    price: 0,
+    images: [],
+    stock: 0,
+    sizes: [],
+    slug: '',
+    gender: Gender.Men,
+    tags: [],
+    user: {} as User
+  }
+
 @Injectable({providedIn: 'root'})
 export class ProductsService {
   private http = inject(HttpClient);
   private baseUrl = environment.baseUrl;
   private productsCache = new Map<string, ProductResponse>();
   private productCache = new Map<string, Product>();
+
+
 
   get(options?: Options): Observable<ProductResponse> {
     const { limit = 9, offset = 0, gender = '' } = options || {};
@@ -46,6 +63,10 @@ export class ProductsService {
   }
 
   getById(id: string): Observable<Product> {
+    if (id === 'new') {
+      return of(emptyProduct);
+    }
+
     if(this.productCache.has(id)) {
       return of(this.productCache.get(id)!);
     }
@@ -53,6 +74,11 @@ export class ProductsService {
     return this.http
       .get<Product>(`${this.baseUrl}/products/${id}`)
       .pipe(tap((product) => this.productCache.set(id, product)));
+  }
+
+  create(product: Partial<Product>): Observable<Product> {
+    return this.http.post<Product>(`${this.baseUrl}/products`, product)
+      .pipe(tap((product) => this.updateProductCache(product)));
   }
 
   update(id: string, product: Partial<Product>): Observable<Product> {

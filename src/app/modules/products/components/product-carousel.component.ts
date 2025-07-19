@@ -20,6 +20,13 @@ import { ProductImagePipe } from '@products/pipes/product-image.pipe';
           <div class="swiper-slide">
             <img [src]="image | productImage" alt="Product Image" class="w-full h-full object-cover" />
           </div>
+        } @empty {
+          <div class="swiper-slide">
+            <img
+              [src]="null | productImage"
+              alt="No Image Available"
+              class="w-full h-full object-cover" />
+          </div>
         }
       </div>
       <!-- If we need pagination -->

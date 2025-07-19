@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ProductCarouselComponent } from '@products/components/product-carousel.component';
@@ -6,6 +6,8 @@ import { Product } from '@core/products/types/product.type';
 import { FormUtils } from '@utils/form-utils';
 import { FormErrorSpanComponent } from "@shared/components/form-error-span.component";
 import { ProductsService } from '@core/products/services';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-product-details',
@@ -123,14 +125,23 @@ import { ProductsService } from '@core/products/services';
         <input type="file" class="file-input file-input-bordered w-full mt-4" />
       </div>
     </form>
+
+    @if(this.wasSaved()) {
+      <div class="alert alert-success fixed bottom-4 right-4 w-80 animated-fadeIn">
+        <span>Product saved successfully!</span>
+      </div>
+    }
   `,
 })
 export class ProductDetailsComponent implements OnInit {
-  productService = inject(ProductsService);
   product = input.required<Product>();
+
+  productService = inject(ProductsService);
+  router = inject(Router);
 
 
   fb = inject(FormBuilder);
+  wasSaved = signal(false);
 
   productForm = this.fb.group({
     title: ['', Validators.required],
@@ -168,7 +179,7 @@ export class ProductDetailsComponent implements OnInit {
     this.productForm.patchValue({ sizes: currentSizes });
   }
 
-  onSubmit() {
+  async onSubmit() {
     const isValid = this.productForm.valid;
     this.productForm.markAllAsTouched();
 
@@ -184,9 +195,23 @@ export class ProductDetailsComponent implements OnInit {
         .map((tag) => tag.trim()) ?? [],
     }
 
-    this.productService.update(this.product().id, productLike).subscribe(product => {
-      console.log('Product updated successfully:', product);
-    });
+    if(this.product().id === 'new') {
+      const product = await firstValueFrom(
+        this.productService.create(productLike as Product)
+      );
+
+      console.log('Product created successfully:', product);
+      this.router.navigate(['/admin/products', product.id]);
+
+    } else {
+      await firstValueFrom(
+        this.productService.update(this.product().id, productLike)
+      );
+      console.log('Product updated successfully:');
+    }
+
+    this.wasSaved.set(true);
+    setTimeout(() => this.wasSaved.set(false), 3000);
 
   }
 }

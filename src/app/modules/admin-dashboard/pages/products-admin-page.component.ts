@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { ProductsService } from '@core/products/services/products.service';
 import { PaginationService } from '@core/shared/services/pagination.service';
 import { ProductTableComponent } from "@products/components/product-table.component";
@@ -7,7 +8,7 @@ import { PaginationComponent } from "@shared/components/pagination.component";
 
 @Component({
   selector: 'app-products-admin-page',
-  imports: [ProductTableComponent, PaginationComponent],
+  imports: [ProductTableComponent, PaginationComponent, RouterLink],
   template: `
     <h1 class="text-2xl font-bold">Products List</h1>
     <h3 class="text-lg">Products totals
@@ -30,6 +31,14 @@ import { PaginationComponent } from "@shared/components/pagination.component";
         <option value="50">50</option>
         <option value="100">100</option>
       </select>
+
+      <div class="flex flex-1"></div>
+
+      <button
+          routerLink="/admin/products/new"
+          class="btn btn-primary" >
+          New Product
+        </button>
     </div>
 
     <!-- Products List -->
