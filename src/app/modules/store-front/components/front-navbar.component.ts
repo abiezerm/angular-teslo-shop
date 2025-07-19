@@ -76,6 +76,13 @@ import { AuthService } from '@core/auth/services/auth.service';
         </ul>
       </div>
       <div class="navbar-end gap-4">
+
+      @if (authService.isAdmin()) {
+        <a class="btn text-accent" routerLink="/admin">
+          Admin Panel
+        </a>
+      }
+
         @if(authService.authStatus() === 'authenticated') {
           <button class="btn btn-ghost" >
             {{ authService.user()?.fullName }}

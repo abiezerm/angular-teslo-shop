@@ -11,6 +11,7 @@
       "@products/*": ["./src/app/modules/products/*"],
       "@shared/*": ["./src/app/modules/shared/*"],
       "@store-front/*": ["./src/app/modules/store-front/*"],
+      "@utils/*": ["./src/app/utils/*"],
     },
     "strict": true,
     "noImplicitOverride": true,

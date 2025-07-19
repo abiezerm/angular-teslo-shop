@@ -9,5 +9,6 @@ export const routes: Routes = [
       UnauthenticatedGuard,
     ]
   },
+  { path: 'admin', loadChildren: () => import('./modules/admin-dashboard/admin-dashboard.routes') },
   { path: '', loadChildren: () =>  import('./modules/store-front/store-front.routes') },
 ];

@@ -43,6 +43,7 @@ export class AuthService {
 
   user = computed<User | null>(() => this._user());
   token = computed<string | null>(() => this._token());
+  isAdmin = computed<boolean>(() => this._user()?.roles.includes('admin') ?? false);
 
   checkStatusResource = rxResource({
     stream: () => this.checkStatus(),
@@ -59,7 +60,6 @@ export class AuthService {
 
   checkStatus(): Observable<boolean> {
     const token = localStorage.getItem('token');
-
     if (!token) {
       this.logout();
       return of(false);

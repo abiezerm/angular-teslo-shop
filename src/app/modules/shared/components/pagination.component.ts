@@ -5,7 +5,7 @@ import { Component, computed, input, linkedSignal, signal } from '@angular/core'
   selector: 'app-pagination',
   imports: [RouterLink],
   template: `
-    <div class="join flex justify-center items-center mt-4 mb-10">
+    <div class="join flex justify-center items-center">
       @for (page of getPagesList(); track page) {
         <button
           class="join-item btn btn-square"
