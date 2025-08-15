@@ -12,7 +12,10 @@ export class ProductImagePipe implements PipeTransform {
       return './assets/images/no-image.jpg'; // Fallback image
     }
 
-    if (typeof image === 'string' && image.length > 0) {
+    if(typeof image === 'string' && image.startsWith('blob:')) {
+      console.log('Blob URL detected:', image);
+      return image; // Return the blob URL as is
+    } else if (typeof image === 'string' && image.length > 0) {
       return `${this.baseUrl}/files/product/${image}`;
     } if (Array.isArray(image) && image.length > 0) {
       // Return the first image in the array

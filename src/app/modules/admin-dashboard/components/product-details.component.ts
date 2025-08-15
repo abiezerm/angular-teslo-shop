@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ProductCarouselComponent } from '@products/components/product-carousel.component';
@@ -120,9 +120,24 @@ import { firstValueFrom } from 'rxjs';
           </button>
         </div>
 
-        <app-product-carousel [images]="product().images" />
+        <app-product-carousel [images]="imagesToCarousel()" />
 
-        <input type="file" class="file-input file-input-bordered w-full mt-4" />
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          class="file-input file-input-bordered w-full mt-4"
+          (change)="onFileChanged($event)"
+        />
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+          @for (image of tempImages(); track $index){
+            <img
+              [src]="image"
+              class="w-full h-32 object-cover rounded-lg"
+              alt="Product image preview"
+            />
+          }
+        </div>
       </div>
     </form>
 
@@ -142,6 +157,9 @@ export class ProductDetailsComponent implements OnInit {
 
   fb = inject(FormBuilder);
   wasSaved = signal(false);
+  tempImages = signal<string[]>([]);
+  imageFileList: FileList| undefined = undefined;
+
 
   productForm = this.fb.group({
     title: ['', Validators.required],
@@ -156,6 +174,11 @@ export class ProductDetailsComponent implements OnInit {
   })
 
   sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+  imagesToCarousel = computed(() => {
+    const allImages = [...this.product().images, ...this.tempImages()];
+    return allImages;
+  });
 
   ngOnInit(){
     this.setFormValue(this.product());
@@ -197,7 +220,7 @@ export class ProductDetailsComponent implements OnInit {
 
     if(this.product().id === 'new') {
       const product = await firstValueFrom(
-        this.productService.create(productLike as Product)
+        this.productService.create(productLike as Product, this.imageFileList)
       );
 
       console.log('Product created successfully:', product);
@@ -205,13 +228,24 @@ export class ProductDetailsComponent implements OnInit {
 
     } else {
       await firstValueFrom(
-        this.productService.update(this.product().id, productLike)
+        this.productService.update(this.product().id, productLike, this.imageFileList)
       );
       console.log('Product updated successfully:');
     }
 
     this.wasSaved.set(true);
     setTimeout(() => this.wasSaved.set(false), 3000);
+
+  }
+
+  //images
+  onFileChanged(event: Event) {
+    const fileList = (event.target as HTMLInputElement).files;
+    this.imageFileList = fileList ?? undefined;
+
+    const imageUrls = Array.from(fileList || []).map(file => URL.createObjectURL(file));
+
+    this.tempImages.set(imageUrls);
 
   }
 }
